@@ -1,6 +1,7 @@
 # 💰 Finance Tracker
 
 A full-stack personal finance application built with **PostgreSQL · Node.js/Express · Angular**.
+Live Link: https://finance-tracker-pearl-mu.vercel.app/
 
 ---
 
@@ -15,20 +16,6 @@ A full-stack personal finance application built with **PostgreSQL · Node.js/Exp
 | Charts    | Chart.js + ng2-charts |
 | UI        | Angular Material   |
 | Container | Docker Compose     |
-
----
-
-## Quick Start (Docker)
-
-```bash
-git clone https://github.com/your-org/finance-tracker.git
-cd finance-tracker
-docker-compose up --build
-```
-
-- Frontend: http://localhost:4200
-- API: http://localhost:3000
-- Demo login: `demo@financetracker.com` / `demo1234`
 
 ---
 
