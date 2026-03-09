@@ -1,6 +1,6 @@
 # 💰 Finance Tracker
 
-A full-stack personal finance application built with **PostgreSQL · Node.js/Express · Angular**.
+A full-stack personal finance application built with **PostgreSQL · Node.js/Express · Angular**.<br>
 Live Link: https://finance-tracker-pearl-mu.vercel.app/
 
 ---
