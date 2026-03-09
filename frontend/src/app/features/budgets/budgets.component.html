@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Budgets</h1>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>add</mat-icon> New Budget
+    </button>
+  </div>
+
+  <!-- Form -->
+  <mat-card class="form-card" *ngIf="showForm">
+    <mat-card-header>
+      <mat-card-title>{{ editId ? 'Edit' : 'Create' }} Budget</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Budget Name (optional)</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Food Budget March">
+          <mat-hint>Leave blank to auto-generate from category + month</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category_id">
+            <mat-option *ngFor="let c of categories" [value]="c.category_id">
+              {{ c.icon || '' }} {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Monthly Limit</mat-label>
+          <input matInput type="number" formControlName="monthly_limit" min="1" step="0.01">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Start Month</mat-label>
+          <input matInput type="date" formControlName="start_month">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Month (optional)</mat-label>
+          <input matInput type="date" formControlName="end_month">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Alert Threshold (%)</mat-label>
+          <input matInput type="number" formControlName="alert_threshold" min="1" max="100">
+          <span matSuffix>%</span>
+          <mat-hint>Get alerted when spending reaches this %</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="cancelForm()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Save Budget</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Budget Cards -->
+  <div class="budgets-grid">
+    <mat-card class="budget-card" *ngFor="let b of budgets">
+      <mat-card-header>
+        <div class="budget-icon">{{ b.category_icon || '' }}</div>
+        <mat-card-title>{{ b.name || b.category_name || 'Uncategorised' }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ b.category_name }} · Alert at {{ b.alert_threshold || 80 }}%
+          <span *ngIf="b.end_month"> · ends {{ b.end_month | date:'MMM y' }}</span>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="budget-amounts">
+          <span class="spent" [class.over]="getPercent(b) > 100">{{ b.spent | currency }} spent</span>
+          <span class="limit">of {{ b.monthly_limit | currency }}</span>
+        </div>
+        <mat-progress-bar
+          [value]="getPercent(b)"
+          [color]="getPercent(b) > 90 ? 'warn' : 'primary'"
+          class="budget-bar">
+        </mat-progress-bar>
+        <div class="budget-footer">
+          <span [class.over-text]="getPercent(b) > 100">
+            {{ getPercent(b) > 100 ? 'Over budget!' : ((b.monthly_limit - b.spent) | currency) + ' remaining' }}
+          </span>
+          <span class="percent">{{ getPercent(b) | number:'1.0-0' }}%</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-icon-button (click)="startEdit(b)" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button color="warn" (click)="delete(b.budget_id)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+      </mat-card-actions>
+    </mat-card>
+
+    <div class="no-data" *ngIf="budgets.length === 0">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <p>No budgets yet. Create one to start tracking!</p>
+    </div>
+  </div>
+</div>

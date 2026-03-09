@@ -1,0 +1,37 @@
+<div class="auth-bg">
+  <mat-card class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-mark">F</div>
+      <h1>Create Account</h1>
+      <p>Start tracking your finances today</p>
+    </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Full Name</mat-label>
+      <input matInput [(ngModel)]="full_name" placeholder="Jane Doe">
+      <mat-icon matPrefix style="margin-right:6px;color:#4c7273">person</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [(ngModel)]="email" placeholder="you@example.com">
+      <mat-icon matPrefix style="margin-right:6px;color:#4c7273">email</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Password</mat-label>
+      <input matInput type="password" [(ngModel)]="password" placeholder="Min. 8 characters">
+      <mat-icon matPrefix style="margin-right:6px;color:#4c7273">lock</mat-icon>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" class="submit-btn" (click)="register()" [disabled]="loading">
+      {{ loading ? 'Creating account...' : 'Create Account' }}
+    </button>
+
+    <div class="text-center">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </div>
+  </mat-card>
+</div>

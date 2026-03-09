@@ -1,0 +1,25 @@
+<mat-toolbar class="navbar">
+  <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="logo">
+    <span class="logo-icon">F</span>
+    FinanceTracker
+  </span>
+
+  <span class="spacer"></span>
+
+  <div class="user-chip" [matMenuTriggerFor]="menu">
+    <div class="avatar">{{ initials }}</div>
+    <span class="user-name">{{ (auth.currentUser$ | async)?.full_name }}</span>
+    <mat-icon style="font-size:16px;width:16px;height:16px;color:rgba(255,255,255,0.6)">expand_more</mat-icon>
+  </div>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="auth.logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>

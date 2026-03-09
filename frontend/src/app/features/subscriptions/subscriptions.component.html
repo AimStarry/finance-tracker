@@ -1,0 +1,117 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Subscriptions</h1>
+      <p class="subtitle" *ngIf="active.length">
+        {{ active.length }} active &middot; {{ monthlyTotal | currency }}/month
+      </p>
+    </div>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>add</mat-icon> Add Subscription
+    </button>
+  </div>
+
+  <!-- Form -->
+  <mat-card class="form-card" *ngIf="showForm">
+    <mat-card-header>
+      <mat-card-title>{{ editId ? 'Edit' : 'New' }} Subscription</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Service / Merchant Name</mat-label>
+          <input matInput formControlName="merchant_name" placeholder="e.g. Netflix, Spotify">
+          <mat-hint>Type a name — it will be created if new</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Amount</mat-label>
+          <input matInput type="number" formControlName="amount" min="0.01" step="0.01">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Billing Cycle</mat-label>
+          <mat-select formControlName="billing_cycle">
+            <mat-option value="weekly">Weekly</mat-option>
+            <mat-option value="monthly">Monthly</mat-option>
+            <mat-option value="quarterly">Quarterly</mat-option>
+            <mat-option value="yearly">Yearly</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Next Billing Date</mat-label>
+          <input matInput type="date" formControlName="next_billing_date">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes (optional)</mat-label>
+          <input matInput formControlName="notes">
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="cancelForm()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Save</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Active Subscriptions -->
+  <h2 class="section-title">Active ({{ active.length }})</h2>
+  <div class="sub-grid">
+    <mat-card class="sub-card" *ngFor="let s of active">
+      <mat-card-content>
+        <div class="sub-header">
+          <div class="sub-avatar">{{ (s.merchant_name || s.name || '?').charAt(0).toUpperCase() }}</div>
+          <div class="sub-info">
+            <div class="sub-name">{{ s.merchant_name || s.name || 'Unknown' }}</div>
+            <div class="sub-cycle">{{ s.billing_cycle | titlecase }}
+              <span *ngIf="s.category_name"> · {{ s.category_icon || '' }} {{ s.category_name }}</span>
+            </div>
+          </div>
+          <div class="sub-amount">{{ s.amount | currency }}</div>
+        </div>
+        <div class="sub-billing" *ngIf="s.next_billing_date">
+          <mat-icon>event</mat-icon>
+          Next: {{ s.next_billing_date | date:'MMM d, y' }}
+          <span class="days-left" [class.soon]="getDaysLeft(s) <= 7">
+            ({{ getDaysLeft(s) }} days)
+          </span>
+        </div>
+        <div class="sub-notes" *ngIf="s.notes">{{ s.notes }}</div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-icon-button (click)="startEdit(s)" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button (click)="pause(s)" matTooltip="Pause"><mat-icon>pause_circle</mat-icon></button>
+        <button mat-icon-button color="warn" (click)="delete(s.subscription_id)" matTooltip="Delete"><mat-icon>cancel</mat-icon></button>
+      </mat-card-actions>
+    </mat-card>
+    <p class="no-data" *ngIf="active.length === 0">No active subscriptions</p>
+  </div>
+
+  <!-- Inactive -->
+  <div *ngIf="inactive.length > 0">
+    <h2 class="section-title">Paused / Inactive</h2>
+    <div class="sub-grid">
+      <mat-card class="sub-card inactive-card" *ngFor="let s of inactive">
+        <mat-card-content>
+          <div class="sub-header">
+            <div class="sub-avatar inactive">{{ (s.merchant_name || s.name || '?').charAt(0).toUpperCase() }}</div>
+            <div class="sub-info">
+              <div class="sub-name">{{ s.merchant_name || s.name || 'Unknown' }}</div>
+              <span class="badge-paused">paused</span>
+            </div>
+            <div class="sub-amount muted">{{ s.amount | currency }}</div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-stroked-button (click)="reactivate(s)">Reactivate</button>
+          <button mat-icon-button color="warn" (click)="delete(s.subscription_id)"><mat-icon>delete</mat-icon></button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>

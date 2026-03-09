@@ -1,0 +1,186 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-title">Transactions</h1>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>add</mat-icon> Add Transaction
+    </button>
+  </div>
+
+  <!-- Add / Edit Form -->
+  <mat-card class="form-card" *ngIf="showForm">
+    <mat-card-header>
+      <mat-card-title>{{ editId ? 'Edit' : 'New' }} Transaction</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Merchant / Payee</mat-label>
+          <input matInput formControlName="merchant_name" placeholder="e.g. Starbucks, Salary">
+          <mat-hint>Type a name — it will be created if new</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category_id">
+            <mat-option [value]="null">-- None --</mat-option>
+            <mat-option *ngFor="let c of categories" [value]="c.category_id">
+              {{ c.icon || '' }} {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Amount</mat-label>
+          <input matInput type="number" formControlName="amount" min="0.01" step="0.01">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="transaction_type">
+            <mat-option value="income">Income</mat-option>
+            <mat-option value="expense">Expense</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+          <input matInput type="date" formControlName="transaction_date">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Payment Method</mat-label>
+          <mat-select formControlName="payment_method">
+            <mat-option value="">-- None --</mat-option>
+            <mat-option value="cash">Cash</mat-option>
+            <mat-option value="credit_card">Credit Card</mat-option>
+            <mat-option value="debit_card">Debit Card</mat-option>
+            <mat-option value="bank_transfer">Bank Transfer</mat-option>
+            <mat-option value="e-wallet">E-Wallet</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <input matInput formControlName="notes" placeholder="Optional notes">
+        </mat-form-field>
+
+        <div class="recurring-check">
+          <mat-checkbox formControlName="is_recurring">Recurring transaction</mat-checkbox>
+        </div>
+
+        <div class="form-actions">
+          <button mat-stroked-button type="button" (click)="cancelForm()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            {{ editId ? 'Update' : 'Add' }} Transaction
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Filters -->
+  <mat-card class="filter-card">
+    <div class="filters">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Type</mat-label>
+        <mat-select [(ngModel)]="filter.transaction_type" (ngModelChange)="filter.page=1; loadTransactions()">
+          <mat-option value="">All</mat-option>
+          <mat-option value="income">Income</mat-option>
+          <mat-option value="expense">Expense</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Payment Method</mat-label>
+        <mat-select [(ngModel)]="filter.payment_method" (ngModelChange)="filter.page=1; loadTransactions()">
+          <mat-option value="">All</mat-option>
+          <mat-option value="cash">Cash</mat-option>
+          <mat-option value="credit_card">Credit Card</mat-option>
+          <mat-option value="debit_card">Debit Card</mat-option>
+          <mat-option value="bank_transfer">Bank Transfer</mat-option>
+          <mat-option value="e-wallet">E-Wallet</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>From</mat-label>
+        <input matInput type="date" [(ngModel)]="filter.start_date" (ngModelChange)="filter.page=1; loadTransactions()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>To</mat-label>
+        <input matInput type="date" [(ngModel)]="filter.end_date" (ngModelChange)="filter.page=1; loadTransactions()">
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Table -->
+  <mat-card>
+    <mat-card-content>
+      <table mat-table [dataSource]="transactions" class="full-width">
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let t">{{ t.transaction_date | date:'MMM d, y' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="merchant">
+          <th mat-header-cell *matHeaderCellDef>Merchant / Category</th>
+          <td mat-cell *matCellDef="let t">
+            <div class="tx-merchant">{{ t.merchant_name || '—' }}</div>
+            <div class="tx-meta">
+              <span *ngIf="t.category_name" class="tx-category">{{ t.category_icon || '' }} {{ t.category_name }}</span>
+              <span *ngIf="t.payment_method" class="tx-payment"> · {{ t.payment_method | titlecase }}</span>
+              <span *ngIf="t.is_recurring" class="tx-recurring"> · Recurring</span>
+              <span *ngIf="t.notes" class="tx-notes" [matTooltip]="t.notes"> · 📝</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="type-badge" [class]="t.transaction_type">{{ t.transaction_type }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <td mat-cell *matCellDef="let t">
+            <span [class]="'amount ' + t.transaction_type">
+              {{ t.transaction_type === 'income' ? '+' : '-' }}{{ t.amount | currency }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let t">
+            <button mat-icon-button (click)="startEdit(t)" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button color="warn" (click)="delete(t.transaction_id)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+      </table>
+      <p class="no-data" *ngIf="transactions.length === 0">No transactions found</p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="pagination && pagination.pages > 1">
+    <span>{{ pagination.total }} total</span>
+    <div>
+      <button mat-icon-button [disabled]="filter.page === 1" (click)="prevPage()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span>Page {{ filter.page }} of {{ pagination.pages }}</span>
+      <button mat-icon-button [disabled]="filter.page === pagination.pages" (click)="nextPage()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+<div class="dashboard">
+  <h1 class="page-title">Dashboard</h1>
+
+  <div class="summary-grid" *ngIf="summary">
+    <mat-card class="stat-card balance animate-fade-up stagger-1">
+      <mat-card-content>
+        <div class="stat-top">
+          <span class="stat-label">Balance</span>
+          <div class="stat-icon-wrap"><mat-icon>account_balance</mat-icon></div>
+        </div>
+        <div class="stat-value">{{ summary.balance | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card income animate-fade-up stagger-2">
+      <mat-card-content>
+        <div class="stat-top">
+          <span class="stat-label">Income</span>
+          <div class="stat-icon-wrap"><mat-icon>trending_up</mat-icon></div>
+        </div>
+        <div class="stat-value">{{ summary.monthly_income | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card expense animate-fade-up stagger-3">
+      <mat-card-content>
+        <div class="stat-top">
+          <span class="stat-label">Expenses</span>
+          <div class="stat-icon-wrap"><mat-icon>trending_down</mat-icon></div>
+        </div>
+        <div class="stat-value">{{ summary.monthly_expenses | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card savings animate-fade-up stagger-4">
+      <mat-card-content>
+        <div class="stat-top">
+          <span class="stat-label">Savings</span>
+          <div class="stat-icon-wrap"><mat-icon>savings</mat-icon></div>
+        </div>
+        <div class="stat-value">{{ summary.monthly_savings | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="charts-grid">
+    <mat-card class="chart-card animate-fade-up" style="animation-delay:0.2s">
+      <mat-card-header><mat-card-title>Income vs Expenses</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <app-chart *ngIf="hasTrendData()" type="line" [data]="trendData" [options]="trendOptions"></app-chart>
+        <p class="no-data" *ngIf="!hasTrendData()">No data yet</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card animate-fade-up" style="animation-delay:0.25s">
+      <mat-card-header><mat-card-title>Spending by Category</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <app-chart *ngIf="hasCategoryData()" type="doughnut" [data]="categoryData" [options]="pieOptions"></app-chart>
+        <p class="no-data" *ngIf="!hasCategoryData()">No spending data</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="lower-grid">
+    <mat-card class="animate-fade-up" style="animation-delay:0.3s" *ngIf="burnRate">
+      <mat-card-header><mat-card-title>Monthly Burn Rate</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="burn-rate-info">
+          <div class="burn-stat">
+            <span class="label">Daily Rate</span>
+            <span class="value">{{ burnRate.daily_burn_rate | currency }}</span>
+          </div>
+          <div class="burn-stat">
+            <span class="label">Projected</span>
+            <span class="value" [class.over]="!burnRate.on_track">{{ burnRate.projected_monthly | currency }}</span>
+          </div>
+          <div class="burn-stat">
+            <span class="label">Days Left</span>
+            <span class="value">{{ burnRate.remaining_days }}</span>
+          </div>
+        </div>
+        <div class="progress-label">
+          <span>{{ burnRate.spent_so_far | currency }} spent</span>
+          <span>{{ burnRate.monthly_income | currency }} income</span>
+        </div>
+        <mat-progress-bar [value]="getSpentPercent()" [color]="burnRate.on_track ? 'primary' : 'warn'"></mat-progress-bar>
+        <p class="on-track" [class.warn]="!burnRate.on_track">
+          {{ burnRate.on_track ? '✓ On track this month' : '⚠ Spending exceeds income pace' }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="animate-fade-up" style="animation-delay:0.35s">
+      <mat-card-header><mat-card-title>Upcoming Subscriptions</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="sub-list">
+          <div class="sub-item" *ngFor="let sub of upcomingSubs">
+            <div class="sub-avatar-sm">{{ (sub.merchant_name || '?').charAt(0).toUpperCase() }}</div>
+            <div class="sub-name">{{ sub.merchant_name || 'Unknown' }}</div>
+            <div class="sub-date">{{ sub.next_billing_date | date:'MMM d' }}</div>
+            <div class="sub-amount">{{ sub.amount | currency }}</div>
+          </div>
+          <p class="no-data" *ngIf="upcomingSubs.length === 0">No upcoming subscriptions</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

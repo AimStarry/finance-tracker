@@ -1,0 +1,15 @@
+.app-container {
+  display: flex;
+  height: calc(100vh - 64px);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  background: #f0f4f4;
+}
+
+@media (max-width: 768px) {
+  .main-content { padding: 16px; }
+}

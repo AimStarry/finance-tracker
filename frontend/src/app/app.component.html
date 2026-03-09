@@ -1,0 +1,13 @@
+<ng-container *ngIf="auth.isLoggedIn; else publicLayout">
+  <app-navbar></app-navbar>
+  <div class="app-container">
+    <app-sidebar></app-sidebar>
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</ng-container>
+
+<ng-template #publicLayout>
+  <router-outlet></router-outlet>
+</ng-template>

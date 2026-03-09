@@ -1,0 +1,26 @@
+<nav class="sidebar" [class.open]="open$ | async">
+  <div class="sidebar-section">
+    <span class="sidebar-label">Main</span>
+    <a routerLink="/dashboard"     routerLinkActive="active" (click)="close()">
+      <mat-icon>dashboard</mat-icon> Dashboard
+    </a>
+    <a routerLink="/transactions"  routerLinkActive="active" (click)="close()">
+      <mat-icon>receipt_long</mat-icon> Transactions
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">Planning</span>
+    <a routerLink="/budgets"       routerLinkActive="active" (click)="close()">
+      <mat-icon>account_balance_wallet</mat-icon> Budgets
+    </a>
+    <a routerLink="/subscriptions" routerLinkActive="active" (click)="close()">
+      <mat-icon>repeat</mat-icon> Subscriptions
+    </a>
+  </div>
+  <div class="sidebar-section">
+    <span class="sidebar-label">Insights</span>
+    <a routerLink="/analytics"     routerLinkActive="active" (click)="close()">
+      <mat-icon>bar_chart</mat-icon> Analytics
+    </a>
+  </div>
+</nav>

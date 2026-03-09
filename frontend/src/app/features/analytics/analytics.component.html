@@ -1,0 +1,82 @@
+<div class="page">
+  <h1 class="page-title">Analytics</h1>
+
+  <div class="kpi-grid" *ngIf="summary">
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <div class="kpi-label">Savings Rate</div>
+        <div class="kpi-value" [class.positive]="savingsRate >= 0" [class.negative]="savingsRate < 0">
+          {{ savingsRate | number:'1.1-1' }}%
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <div class="kpi-label">Total Income (all time)</div>
+        <div class="kpi-value positive">{{ summary.total_income | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <div class="kpi-label">Total Expenses (all time)</div>
+        <div class="kpi-value negative">{{ summary.total_expenses | currency }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi-card" *ngIf="burnRate">
+      <mat-card-content>
+        <div class="kpi-label">Daily Burn Rate</div>
+        <div class="kpi-value">{{ burnRate.daily_burn_rate | currency }}/day</div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="chart-card full-width">
+    <mat-card-header><mat-card-title>Income vs Expenses — 6 Month Trend</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <app-chart *ngIf="hasBarData()" type="bar" [data]="barData" [options]="barOptions"></app-chart>
+      <p class="no-data" *ngIf="!hasBarData()">No data yet</p>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="charts-row">
+    <mat-card class="chart-card">
+      <mat-card-header><mat-card-title>Spending by Category</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <app-chart *ngIf="hasDoughnutData()" type="doughnut" [data]="doughnutData" [options]="doughnutOptions"></app-chart>
+        <p class="no-data" *ngIf="!hasDoughnutData()">No spending data</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header><mat-card-title>Category Breakdown (This Month)</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="category-rows">
+          <div class="category-row" *ngFor="let c of categories; let i = index">
+            <div class="cat-color" [style.background]="colors[i % colors.length]"></div>
+            <div class="cat-icon">{{ c.icon || '📦' }}</div>
+            <div class="cat-name">{{ c.name }}</div>
+            <div class="cat-count">{{ c.transaction_count }} txns</div>
+            <div class="cat-total">{{ c.total | currency }}</div>
+          </div>
+          <p class="no-data" *ngIf="categories.length === 0">No spending this month</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card *ngIf="burnRate" class="burn-card">
+    <mat-card-header>
+      <mat-card-title>🔥 Burn Rate — Day {{ burnRate.day_of_month }} of {{ burnRate.days_in_month }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="burn-grid">
+        <div class="burn-item"><span class="bl">Spent so far</span>     <span class="bv warn">{{ burnRate.spent_so_far | currency }}</span></div>
+        <div class="burn-item"><span class="bl">Daily rate</span>        <span class="bv">{{ burnRate.daily_burn_rate | currency }}</span></div>
+        <div class="burn-item"><span class="bl">Projected monthly</span> <span class="bv" [class.warn]="!burnRate.on_track">{{ burnRate.projected_monthly | currency }}</span></div>
+        <div class="burn-item"><span class="bl">Monthly income</span>    <span class="bv ok">{{ burnRate.monthly_income | currency }}</span></div>
+        <div class="burn-item"><span class="bl">Remaining days</span>    <span class="bv">{{ burnRate.remaining_days }} days</span></div>
+        <div class="burn-item"><span class="bl">Status</span>             <span class="bv" [class.ok]="burnRate.on_track" [class.warn]="!burnRate.on_track">{{ burnRate.on_track ? '✅ On Track' : '⚠️ Over Pace' }}</span></div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
